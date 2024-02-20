@@ -1,59 +1,88 @@
 // SPDX-License-Identifier: MIT
-// This is only for practice only. 
-// The code can be compiled on 
+// This is only for practice only.
+// The code can be compiled on Remix.
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.7;
 
 contract Encoding {
-    function combineStrings() public pure returns(string memory) {
-        return string(abi.encodePacked("Hi Blockchain! ", "Have a great day!"));
+    function combineStrings() public pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked("Blockchain is awesome! ", "Have a great day!")
+            );
     }
 
     // Example functions
-    function encodeNumber() public pure returns(bytes memory){
-        bytes memory number = abi.encode(1);
+    // in Solidity 0.8.12+ we can use string.concat(arg, arg)
+
+    // When we send a transaction, it is "compiled" down to bytecode and sent in a "data" object of the transaction.
+    // That data object now governs how future transactions will interact with it.
+    // Exmaple: https://sepolia.etherscan.io/address/0x5c1ddb86F11BB46D3067C702AC554aEaED9ff8f0#writeContract
+
+    function encodeNumber() public pure returns (bytes memory) {
+        bytes memory number = abi.encode(1); // View how the number looks in binary format.
         return number;
     }
 
-    function encodeString() public pure returns(bytes memory){
+    // We can basically encode almost anything. Example:
+    function encodeString() public pure returns (bytes memory) {
         bytes memory someString = abi.encode("Random string");
         return someString;
     }
 
-    function encodeStringPacked() public pure returns(bytes memory){
+    // encodePacked is like a compressor.
+    // If we don't want a perfect binary version of something, we can use abi.encodePacked
+    function encodeStringPacked() public pure returns (bytes memory) {
         bytes memory someString = abi.encodePacked("Random string");
         return someString;
     }
 
-    function encodeStringBytes() public pure returns(bytes memory){
+    // Typecasting
+    // the above function (encodeeStringPacked()) and this one are almost same.
+    function encodeStringBytes() public pure returns (bytes memory) {
         bytes memory someString = bytes("Random string");
         return someString;
     }
 
-    function decodeString() public pure returns(string memory){
+    // We can also decode stuff.
+    // Note: This only works with 'encode' and not with 'encodePacked' coz the later is trimmed.
+    function decodeString() public pure returns (string memory) {
         string memory decodedString = abi.decode(encodeString(), (string));
         return decodedString;
     }
 
-    function encodeMulti() public pure returns(bytes memory){
-        bytes memory encodeMultiple = abi.encode("Random string", "Another string");
+    // We can multi decode as well.
+    function encodeMulti() public pure returns (bytes memory) {
+        bytes memory encodeMultiple = abi.encode(
+            "Random string",
+            "Another string"
+        );
         return encodeMultiple;
     }
 
-    function decodeMulti() public pure returns(string memory, string memory){
-        (string memory firstString, string memory secondString) = abi.decode(encodeMulti(), (string, string));
+    // and we can also multi decode. Well obviously.
+    function decodeMulti() public pure returns (string memory, string memory) {
+        (string memory firstString, string memory secondString) = abi.decode(
+            encodeMulti(),
+            (string, string)
+        );
         return (firstString, secondString);
     }
 
-    function multiPackedEncode() public pure returns(bytes memory) {
-        bytes memory multiPacked = abi.encodePacked("Random string, ", "Another string");
+    // We can 'encodePacked' multiple stuff as well.
+    // Don't try to decode them.
+    function multiPackedEncode() public pure returns (bytes memory) {
+        bytes memory multiPacked = abi.encodePacked(
+            "Random string, ",
+            "Another string"
+        );
         return multiPacked;
     }
 
-    // The packed version cannot be decoded by abi.decode 
-    // however we can make a function like below to type cast 'packed' data into 'string'
+    // Since the packed version cannot be decoded by abi.decode
+    // we can make a function like below to type cast 'packed' data into 'string'
 
-    function stringCastPacked() public pure returns(string memory){
+    function stringCastPacked() public pure returns (string memory) {
         string memory stringCasted = string(multiPackedEncode());
         return stringCasted;
     }
@@ -61,18 +90,18 @@ contract Encoding {
     // How to send transaction that call functions with just the data field populated?
     // How to populate the data field?
 
-    // Solidity has some more "low-level" keywords, namely "staticcall" and "call". 
-    // Call was used in the Raffle Lottery project.
-    // There is also 'send'. 
+    // Solidity has some more "low-level" keywords, namely "staticcall" and "call".
+    // Call is used in the Raffle Lottery project.
+    // There is also 'send'.
 
     // call: How we call functions to change the state of the blockchain.
     // staticcall: This is how (at a low level) we do our "view" or "pure" function calls, and potentially don't change the blockchain state.
 
     // Example of 'call'. Won't work here.
-    function withdraw(address recentWinner) public {
-        (bool success,) = recentWinner.call{value: address(this).balance}("");
-        require(success, "Transfer Failed");
-    }
+    // function withdraw(address recentWinner) public {
+    //     (bool success, ) = recentWinner.call{value: address(this).balance}("");
+    //     require(success, "Transfer Failed");
+    // }
 
     // Notes:
     // - In our {} we were able to pass specific fields of a transaction, like value, Gas Price and Gas Limit.

@@ -7,6 +7,7 @@ This repository contains some examples with explanations of some advanced Solidi
 2. Explanation of the differences between the above functions and how they work on a low/system level.
 3. What is `call()`, `staticcall()` and `send()`.
 4. How and when to use the `call()` function and different types of approach in implementing it.
+5. Example of how to use `delegatecall()` function and how it works.
 
 ## Note:
 Since `call()` is a low level function and utilizing it required low level code, this may raise warning flags by some auditors. Importing an interface is better option as it will have compiler, able to check it the types are matching, etc. So its bettwer to avoid this when possible.
